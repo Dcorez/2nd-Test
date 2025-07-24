@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latihan Interaktif Literasi Biologi Kelas 9</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Sky Blue Neutrals -->
+    <!-- Application Structure Plan: The application now starts with a landing page for student data input (name, class, date) to personalize the experience. After input, users transition to the main quiz page. The quiz page retains its tab-based navigation for difficulty levels (Mudah, Sedang, Sulit), allowing focused study. Each question now features a textarea for student answers. A "Periksa Jawaban" button (initially disabled) appears once all questions in the active tab are answered, triggering the display of correct answers and a comparison. Finally, an "Unduh Hasil" button allows students to get a printable summary of their work. This structure enhances engagement and provides a complete, self-contained learning and assessment tool. -->
+    <!-- Visualization & Content Choices: The source is text-based Q&A. Goal: Enhance comprehension, engagement, and self-assessment. Method: Textareas for direct input, dynamic content visibility for answers and feedback, and a printable HTML report for results. Simple diagrams (structured HTML/CSS) are maintained for visual context within each section. Interaction: Form submission, tab switching, input validation, and button clicks to reveal/compare answers and trigger downloads. Justification: This interactive approach promotes active learning and immediate feedback, making abstract biological concepts more tangible. Library: Vanilla JS for all interactions. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .tab-btn.active {
+            background-color: #0284c7; /* sky-600 */
+            color: white;
+            font-weight: 600;
+        }
+        .answer-display-area {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out;
+        }
+        .answer-display-area.visible {
+            max-height: 1000px; /* Large enough to fit content */
+            padding-top: 1rem;
+        }
+        .diagram-box {
+            border: 2px solid #e5e7eb; /* gray-200 */
+            border-radius: 0.75rem; /* 12px */
+            padding: 1rem; /* 16px */
+            background-color: #f9fafb; /* gray-50 */
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .correct-answer-text {
+            color: #059669; /* emerald-600 */
+        }
+        .student-answer-text {
+            color: #1d4ed8; /* blue-700 */
+        }
+        .comparison-result {
+            margin-top: 0.5rem;
+            font-size: 0.875rem; /* text-sm */
+        }
+        .comparison-result.correct {
+            color: #059669; /* emerald-600 */
+            font-weight: 600;
+        }
+        .comparison-result.incorrect {
+            color: #dc2626; /* red-600 */
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto max-w-5xl p-4 sm:p-6 md:p-8">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-sky-700">Latihan Literasi Biologi</h1>
+            <p class="text-gray-600 mt-2">Kelas 9 - Uji Pemahaman Konsep Kunci</p>
+        </header>
+
+        <!-- Landing Page -->
+        <section id="landing-page" class="bg-white p-8 rounded-xl shadow-md max-w-md mx-auto">
+            <h2 class="text-2xl font-bold text-sky-700 mb-6 text-center">Selamat Datang!</h2>
+            <p class="text-gray-600 mb-6 text-center">Silakan isi data diri Anda untuk memulai latihan.</p>
+            
+            <div class="mb-4">
+                <label for="student-name" class="block text-gray-700 text-sm font-bold mb-2">Nama Lengkap:</label>
+                <input type="text" id="student-name" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Masukkan nama Anda">
+            </div>
+            <div class="mb-4">
+                <label for="student-class" class="block text-gray-700 text-sm font-bold mb-2">Kelas:</label>
+                <input type="text" id="student-class" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Contoh: 9A">
+            </div>
+            <div class="mb-6">
+                <label for="current-date" class="block text-gray-700 text-sm font-bold mb-2">Tanggal:</label>
+                <input type="date" id="current-date" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500">
+            </div>
+            
+            <button id="start-quiz-btn" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline transition-colors duration-300">
+                Mulai Latihan
+            </button>
+            <p id="landing-error-message" class="text-red-600 text-sm mt-3 text-center hidden">Harap lengkapi semua data diri.</p>
+        </section>
+
+        <!-- Quiz Page (Initially Hidden) -->
+        <section id="quiz-page" class="hidden">
+            <nav class="flex justify-center items-center bg-white p-2 rounded-xl shadow-md mb-8 sticky top-4 z-10">
+                <button data-target="mudah" class="tab-btn flex-1 py-2 px-4 rounded-lg text-sm sm:text-base text-gray-700 transition-colors duration-300 active">Mudah</button>
+                <button data-target="sedang" class="tab-btn flex-1 py-2 px-4 rounded-lg text-sm sm:text-base text-gray-700 transition-colors duration-300">Sedang</button>
+                <button data-target="sulit" class="tab-btn flex-1 py-2 px-4 rounded-lg text-sm sm:text-base text-gray-700 transition-colors duration-300">Sulit</button>
+            </nav>
+
+            <main id="content-container">
+                <!-- Kategori Mudah -->
+                <section id="mudah" class="content-section space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-xl font-semibold text-sky-600 mb-3">Bacaan: Unit Dasar Kehidupan</h3>
+                        <p class="text-gray-600 leading-relaxed">
+                            Sel adalah unit dasar kehidupan. Semua makhluk hidup, mulai dari bakteri hingga manusia, tersusun atas sel. Ada dua jenis utama sel: sel prokariotik dan sel eukariotik. Sel prokariotik adalah sel yang tidak memiliki membran inti dan organel bermembran, contohnya bakteri. Sebaliknya, sel eukariotik memiliki membran inti dan organel bermembran yang terstruktur dengan baik, seperti mitokondria dan kloroplas. Tumbuhan, hewan, jamur, dan protista adalah contoh organisme yang memiliki sel eukariotik.
+                        </p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h4 class="text-lg font-semibold text-sky-600 mb-4">Soal 1</h4>
+                        <p class="font-medium text-gray-700">Berdasarkan teks di atas, jelaskan apa yang dimaksud dengan sel.</p>
+                        <div class="mt-4 space-y-4">
+                            <div>
+                                <label for="mudah-q1-a" class="block text-gray-700 text-sm font-bold mb-2">a. Apa definisi sel menurut teks?</label>
+                                <textarea id="mudah-q1-a" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Sel adalah <strong>unit dasar kehidupan</strong>.</p>
+                                    <p class="comparison-result" data-comparison-for="mudah-q1-a"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="mudah-q1-b" class="block text-gray-700 text-sm font-bold mb-2">b. Sebutkan dua jenis utama sel yang disebutkan dalam bacaan.</label>
+                                <textarea id="mudah-q1-b" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Dua jenis utama sel adalah <strong>sel prokariotik</strong> dan <strong>sel eukariotik</strong>.</p>
+                                    <p class="comparison-result" data-comparison-for="mudah-q1-b"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="mudah-q1-c" class="block text-gray-700 text-sm font-bold mb-2">c. Bagaimana perbedaan utama antara sel prokariotik dan sel eukariotik terkait keberadaan membran inti?</label>
+                                <textarea id="mudah-q1-c" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Perbedaan utamanya adalah <strong>sel eukariotik memiliki membran inti</strong>, sedangkan <strong>sel prokariotik tidak</strong>.</p>
+                                    <p class="comparison-result" data-comparison-for="mudah-q1-c"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="mudah-q1-d" class="block text-gray-700 text-sm font-bold mb-2">d. Berikan satu contoh organisme yang memiliki sel prokariotik.</label>
+                                <textarea id="mudah-q1-d" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Satu contoh organisme yang memiliki sel prokariotik adalah <strong>bakteri</strong>.</p>
+                                    <p class="comparison-result" data-comparison-for="mudah-q1-d"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h4 class="text-lg font-semibold text-sky-600 mb-4">Soal 2</h4>
+                        <p class="font-medium text-gray-700">Mitokondria dan kloroplas adalah contoh organel bermembran.</p>
+                        <div class="mt-4 space-y-4">
+                            <div>
+                                <label for="mudah-q2-a" class="block text-gray-700 text-sm font-bold mb-2">a. Jenis sel apa yang memiliki organel bermembran seperti mitokondria dan kloroplas?</label>
+                                <textarea id="mudah-q2-a" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Jenis sel yang memiliki organel bermembran seperti mitokondria dan kloroplas adalah <strong>sel eukariotik</strong>.</p>
+                                    <p class="comparison-result" data-comparison-for="mudah-q2-a"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="mudah-q2-b" class="block text-gray-700 text-sm font-bold mb-2">b. Apakah bakteri termasuk jenis sel yang memiliki organel bermembran? Jelaskan mengapa.</label>
+                                <textarea id="mudah-q2-b" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text"><strong>Tidak</strong>, bakteri tidak termasuk jenis sel yang memiliki organel bermembran karena bakteri adalah <strong>sel prokariotik</strong> yang tidak memiliki organel bermembran.</p>
+                                    <p class="comparison-result" data-comparison-for="mudah-q2-b"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="mudah-q2-c" class="block text-gray-700 text-sm font-bold mb-2">c. Sebutkan setidaknya dua contoh organisme yang memiliki sel eukariotik.</label>
+                                <textarea id="mudah-q2-c" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Dua contoh organisme yang memiliki sel eukariotik adalah <strong>tumbuhan, hewan, jamur, atau protista</strong> (pilih dua).</p>
+                                    <p class="comparison-result" data-comparison-for="mudah-q2-c"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="mudah-q2-d" class="block text-gray-700 text-sm font-bold mb-2">d. Mengapa keberadaan membran inti penting untuk sel eukariotik?</label>
+                                <textarea id="mudah-q2-d" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Keberadaan membran inti penting untuk sel eukariotik karena <strong>melindungi materi genetik (DNA) dan memisahkan proses transkripsi dari translasi</strong>, memungkinkan regulasi gen yang lebih kompleks.</p>
+                                    <p class="comparison-result" data-comparison-for="mudah-q2-d"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Kategori Sedang -->
+                <section id="sedang" class="content-section space-y-6 hidden">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-xl font-semibold text-sky-600 mb-3">Bacaan: Sistem Pencernaan Manusia</h3>
+                        <p class="text-gray-600 leading-relaxed">
+                            Sistem pencernaan manusia adalah serangkaian organ yang bekerja sama untuk memecah makanan menjadi molekul-molekul kecil yang dapat diserap oleh tubuh. Proses ini dimulai di mulut, di mana makanan dikunyah dan dicampur dengan air liur yang mengandung enzim amilase untuk memulai pencernaan karbohidrat. Kemudian, makanan bergerak melalui kerongkongan ke lambung. Di lambung, makanan dicerna secara mekanis dan kimiawi oleh asam lambung dan enzim pepsin yang memecah protein. Setelah itu, makanan yang setengah dicerna (kimus) masuk ke usus halus, tempat sebagian besar penyerapan nutrisi terjadi dengan bantuan enzim dari pankreas dan empedu dari hati. Sisa makanan yang tidak dicerna akan masuk ke usus besar untuk penyerapan air, dan akhirnya dikeluarkan sebagai feses.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h4 class="text-lg font-semibold text-sky-600 mb-4">Soal 1</h4>
+                        <p class="font-medium text-gray-700">Jelaskan alur perjalanan makanan dari mulut hingga ke usus besar, serta proses pencernaan yang terjadi di setiap organ utama yang disebutkan.</p>
+                        <div class="mt-4 space-y-4">
+                            <div>
+                                <label for="sedang-q1-a" class="block text-gray-700 text-sm font-bold mb-2">a. Di organ mana proses pencernaan karbohidrat dimulai dan enzim apa yang berperan?</label>
+                                <textarea id="sedang-q1-a" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Proses pencernaan karbohidrat dimulai di <strong>mulut</strong> dengan bantuan enzim <strong>amilase</strong> dari air liur.</p>
+                                    <p class="comparison-result" data-comparison-for="sedang-q1-a"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="sedang-q1-b" class="block text-gray-700 text-sm font-bold mb-2">b. Apa yang terjadi pada makanan di lambung, dan enzim serta zat apa yang terlibat?</label>
+                                <textarea id="sedang-q1-b" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Di lambung, makanan dicerna secara <strong>mekanis dan kimiawi</strong> oleh <strong>asam lambung</strong> dan enzim <strong>pepsin</strong> yang memecah protein.</p>
+                                    <p class="comparison-result" data-comparison-for="sedang-q1-b"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="sedang-q1-c" class="block text-gray-700 text-sm font-bold mb-2">c. Mengapa usus halus dianggap sebagai tempat utama penyerapan nutrisi, dan organ apa yang membantunya?</label>
+                                <textarea id="sedang-q1-c" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Usus halus dianggap sebagai tempat utama penyerapan nutrisi karena <strong>sebagian besar penyerapan nutrisi terjadi di sana</strong>, dibantu oleh enzim dari <strong>pankreas</strong> dan <strong>empedu</strong> dari hati.</p>
+                                    <p class="comparison-result" data-comparison-for="sedang-q1-c"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="sedang-q1-d" class="block text-gray-700 text-sm font-bold mb-2">d. Apa peran usus besar dalam sistem pencernaan sebelum makanan dikeluarkan dari tubuh?</label>
+                                <textarea id="sedang-q1-d" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Peran usus besar adalah untuk <strong>penyerapan air</strong> dari sisa makanan yang tidak dicerna, sebelum akhirnya dikeluarkan sebagai feses.</p>
+                                    <p class="comparison-result" data-comparison-for="sedang-q1-d"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h4 class="text-lg font-semibold text-sky-600 mb-4">Soal 2</h4>
+                        <p class="font-medium text-gray-700">Peran enzim sangat penting dalam proses pencernaan.</p>
+                        <div class="mt-4 space-y-4">
+                            <div>
+                                <label for="sedang-q2-a" class="block text-gray-700 text-sm font-bold mb-2">a. Enzim apa yang memulai pencernaan karbohidrat di mulut?</label>
+                                <textarea id="sedang-q2-a" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Enzim yang memulai pencernaan karbohidrat di mulut adalah <strong>amilase</strong>.</p>
+                                    <p class="comparison-result" data-comparison-for="sedang-q2-a"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="sedang-q2-b" class="block text-gray-700 text-sm font-bold mb-2">b. Enzim apa yang berfungsi memecah protein di lambung?</label>
+                                <textarea id="sedang-q2-b" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Enzim yang berfungsi memecah protein di lambung adalah <strong>pepsin</strong>.</p>
+                                    <p class="comparison-result" data-comparison-for="sedang-q2-b"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="sedang-q2-c" class="block text-gray-700 text-sm font-bold mb-2">c. Selain enzim dari pankreas, zat lain apa dari hati yang membantu pencernaan di usus halus?</label>
+                                <textarea id="sedang-q2-c" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Selain enzim dari pankreas, zat lain dari hati yang membantu pencernaan di usus halus adalah <strong>empedu</strong>.</p>
+                                    <p class="comparison-result" data-comparison-for="sedang-q2-c"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="sedang-q2-d" class="block text-gray-700 text-sm font-bold mb-2">d. Bagaimana proses pencernaan di usus halus berbeda dengan di lambung dalam hal penyerapan nutrisi?</label>
+                                <textarea id="sedang-q2-d" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Di usus halus, fokus utama adalah <strong>penyerapan nutrisi</strong> ke dalam tubuh, sedangkan di lambung lebih banyak terjadi <strong>pemecahan awal protein</strong> dan pencernaan mekanis.</p>
+                                    <p class="comparison-result" data-comparison-for="sedang-q2-d"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Kategori Sulit -->
+                <section id="sulit" class="content-section space-y-6 hidden">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-xl font-semibold text-sky-600 mb-3">Bacaan: Mekanisme Evolusi</h3>
+                        <p class="text-gray-600 leading-relaxed">
+                            Evolusi adalah perubahan sifat-sifat terwariskan suatu populasi organisme dari satu generasi ke generasi berikutnya. Mekanisme utama yang mendorong evolusi adalah seleksi alam, yang diusulkan oleh Charles Darwin. Seleksi alam terjadi ketika individu dalam suatu populasi memiliki variasi sifat yang dapat diwariskan. Jika sifat-sifat tertentu memberikan keuntungan adaptif (misalnya, kemampuan lebih baik untuk mencari makan, menghindari predator, atau bereproduksi) dalam lingkungan tertentu, individu dengan sifat tersebut cenderung bertahan hidup dan bereproduksi lebih banyak dibandingkan individu lain. Akibatnya, sifat-sifat yang menguntungkan ini menjadi lebih umum dalam populasi dari waktu ke waktu. Proses ini, yang berlangsung selama jutaan tahun, dapat menyebabkan pembentukan spesies baru.
+                        </p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h4 class="text-lg font-semibold text-sky-600 mb-4">Soal 1</h4>
+                        <p class="font-medium text-gray-700">Analisis peran variasi genetik dalam proses seleksi alam dan bagaimana hal itu berkontribusi pada perubahan populasi.</p>
+                        <div class="mt-4 space-y-4">
+                            <div>
+                                <label for="sulit-q1-a" class="block text-gray-700 text-sm font-bold mb-2">a. Mengapa variasi sifat dalam suatu populasi dianggap sebagai prasyarat penting bagi terjadinya seleksi alam?</label>
+                                <textarea id="sulit-q1-a" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Variasi sifat adalah prasyarat penting karena <strong>seleksi alam bekerja dengan "memilih" individu yang memiliki sifat-sifat terwariskan yang lebih cocok atau menguntungkan</strong> di lingkungan tertentu. Tanpa variasi, semua individu akan sama, dan tidak ada dasar bagi seleksi untuk bekerja.</p>
+                                    <p class="comparison-result" data-comparison-for="sulit-q1-a"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="sulit-q1-b" class="block text-gray-700 text-sm font-bold mb-2">b. Jelaskan konsep "keuntungan adaptif" dan berikan contohnya berdasarkan teks.</label>
+                                <textarea id="sulit-q1-b" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">"Keuntungan adaptif" adalah sifat yang <strong>meningkatkan peluang individu untuk bertahan hidup dan bereproduksi</strong> di lingkungan tertentu. Contohnya dalam teks adalah <strong>kemampuan lebih baik untuk mencari makan, menghindari predator, atau bereproduksi</strong>.</p>
+                                    <p class="comparison-result" data-comparison-for="sulit-q1-b"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="sulit-q1-c" class="block text-gray-700 text-sm font-bold mb-2">c. Bagaimana individu dengan sifat yang menguntungkan dapat memengaruhi frekuensi sifat tersebut dalam populasi di generasi berikutnya?</label>
+                                <textarea id="sulit-q1-c" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Individu dengan sifat yang menguntungkan cenderung <strong>bertahan hidup lebih lama dan bereproduksi lebih banyak</strong>, sehingga <strong>mewariskan sifat-sifat tersebut kepada lebih banyak keturunan</strong>. Ini menyebabkan sifat yang menguntungkan menjadi <strong>lebih umum (frekuensinya meningkat)</strong> dalam populasi dari waktu ke waktu.</p>
+                                    <p class="comparison-result" data-comparison-for="sulit-q1-c"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="sulit-q1-d" class="block text-gray-700 text-sm font-bold mb-2">d. Apa implikasi jangka panjang dari proses seleksi alam terhadap keanekaragaman hayati?</label>
+                                <textarea id="sulit-q1-d" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Implikasi jangka panjangnya adalah <strong>perubahan komposisi genetik populasi</strong>, yang dapat mengarah pada <strong>adaptasi spesies terhadap lingkungannya</strong> dan pada akhirnya <strong>pembentukan spesies baru</strong>, sehingga meningkatkan keanekaragaman hayati.</p>
+                                    <p class="comparison-result" data-comparison-for="sulit-q1-d"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h4 class="text-lg font-semibold text-sky-600 mb-4">Soal 2</h4>
+                        <p class="font-medium text-gray-700">Meskipun proses evolusi melalui seleksi alam berlangsung sangat lama, dampaknya bisa sangat signifikan.</p>
+                        <div class="mt-4 space-y-4">
+                            <div>
+                                <label for="sulit-q2-a" class="block text-gray-700 text-sm font-bold mb-2">a. Jelaskan mengapa seleksi alam dikatakan dapat menyebabkan pembentukan spesies baru.</label>
+                                <textarea id="sulit-q2-a" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Seleksi alam dapat menyebabkan pembentukan spesies baru karena <strong>akumulasi sifat-sifat menguntungkan yang sangat berbeda secara bertahap selama jutaan tahun</strong> dapat membuat suatu populasi menjadi sangat berbeda dari nenek moyangnya atau populasi lain, hingga tidak lagi dapat kawin silang secara alami, sehingga membentuk spesies yang terpisah.</p>
+                                    <p class="comparison-result" data-comparison-for="sulit-q2-a"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="sulit-q2-b" class="block text-gray-700 text-sm font-bold mb-2">b. Apa yang akan terjadi pada sifat-sifat yang tidak memberikan keuntungan adaptif dalam suatu populasi yang mengalami seleksi alam?</label>
+                                <textarea id="sulit-q2-b" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Sifat-sifat yang tidak memberikan keuntungan adaptif kemungkinan besar akan <strong>menjadi kurang umum atau bahkan menghilang dari populasi</strong> dari waktu ke waktu, karena individu yang memilikinya cenderung kurang berhasil dalam bertahan hidup dan bereproduksi.</p>
+                                    <p class="comparison-result" data-comparison-for="sulit-q2-b"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="sulit-q2-c" class="block text-gray-700 text-sm font-bold mb-2">c. Bagaimana lingkungan berperan dalam menentukan sifat mana yang akan memberikan "keuntungan adaptif"?</label>
+                                <textarea id="sulit-q2-c" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Lingkungan berperan sebagai <strong>faktor penyeleksi</strong>. Lingkunganlah yang <strong>menentukan sifat mana yang "menguntungkan"</strong> pada waktu dan tempat tertentu, yaitu sifat yang paling sesuai untuk bertahan hidup dan bereproduksi di lingkungan tersebut.</p>
+                                    <p class="comparison-result" data-comparison-for="sulit-q2-c"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="sulit-q2-d" class="block text-gray-700 text-sm font-bold mb-2">d. Selain kemampuan mencari makan, menghindari predator, atau bereproduksi, sebutkan satu contoh lain dari "keuntungan adaptif" yang mungkin terjadi pada suatu organisme.</label>
+                                <textarea id="sulit-q2-d" class="answer-input shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Tulis jawaban Anda di sini."></textarea>
+                                <div class="answer-display-area bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                                    <p class="font-bold text-sky-700 mt-2">Jawaban Sebenarnya:</p>
+                                    <p class="correct-answer-text">Satu contoh lain dari "keuntungan adaptif" yang mungkin terjadi adalah <strong>ketahanan terhadap penyakit</strong>, <strong>toleransi terhadap suhu ekstrem</strong>, atau <strong>kemampuan untuk menggunakan sumber daya baru</strong>.</p>
+                                    <p class="comparison-result" data-comparison-for="sulit-q2-d"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+                <button id="check-answers-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    Periksa Jawaban
+                </button>
+                <button id="download-results-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    Unduh Hasil (HTML)
+                </button>
+            </div>
+            <p id="quiz-error-message" class="text-red-600 text-sm mt-3 text-center hidden">Harap jawab semua pertanyaan di kategori ini.</p>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const landingPage = document.getElementById('landing-page');
+            const quizPage = document.getElementById('quiz-page');
+            const startQuizBtn = document.getElementById('start-quiz-btn');
+            const studentNameInput = document.getElementById('student-name');
+            const studentClassInput = document.getElementById('student-class');
+            const currentDateInput = document.getElementById('current-date');
+            const landingErrorMessage = document.getElementById('landing-error-message');
+
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const contentSections = document.querySelectorAll('.content-section');
+            const checkAnswersBtn = document.getElementById('check-answers-btn');
+            const downloadResultsBtn = document.getElementById('download-results-btn');
+            const quizErrorMessage = document.getElementById('quiz-error-message');
+
+            let studentInfo = {};
+            let studentAnswers = {}; // Store answers for all questions across all categories
+
+            // Set current date input to today's date by default
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months start at 0!
+            const dd = String(today.getDate()).padStart(2, '0');
+            currentDateInput.value = `${yyyy}-${mm}-${dd}`;
+
+            startQuizBtn.addEventListener('click', () => {
+                const name = studentNameInput.value.trim();
+                const studentClass = studentClassInput.value.trim();
+                const date = currentDateInput.value;
+
+                if (name && studentClass && date) {
+                    studentInfo = { name, studentClass, date };
+                    landingPage.classList.add('hidden');
+                    quizPage.classList.remove('hidden');
+                    landingErrorMessage.classList.add('hidden');
+                    // Initialize answer inputs for the first (active) tab
+                    updateCheckButtonState();
+                } else {
+                    landingErrorMessage.classList.remove('hidden');
+                }
+            });
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.dataset.target;
+
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    contentSections.forEach(section => {
+                        section.classList.toggle('hidden', section.id !== targetId);
+                    });
+
+                    // Hide all answer displays when changing tabs
+                    document.querySelectorAll('.answer-display-area').forEach(area => {
+                        area.classList.remove('visible');
+                    });
+                    checkAnswersBtn.textContent = 'Periksa Jawaban';
+                    downloadResultsBtn.disabled = true;
+                    quizErrorMessage.classList.add('hidden');
+                    updateCheckButtonState();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+
+            function updateCheckButtonState() {
+                const activeSection = document.querySelector('.content-section:not(.hidden)');
+                if (!activeSection) return;
+
+                const answerInputs = activeSection.querySelectorAll('.answer-input');
+                let allFilled = true;
+                answerInputs.forEach(input => {
+                    if (input.value.trim() === '') {
+                        allFilled = false;
+                    }
+                });
+                checkAnswersBtn.disabled = !allFilled;
+            }
+
+            // Listen for input changes on all textareas to enable/disable check button
+            document.querySelectorAll('.answer-input').forEach(input => {
+                input.addEventListener('input', updateCheckButtonState);
+            });
+
+            checkAnswersBtn.addEventListener('click', () => {
+                const activeSection = document.querySelector('.content-section:not(.hidden)');
+                if (!activeSection) return;
+
+                const answerInputs = activeSection.querySelectorAll('.answer-input');
+                let allFilled = true;
+                answerInputs.forEach(input => {
+                    if (input.value.trim() === '') {
+                        allFilled = false;
+                    }
+                });
+
+                if (!allFilled) {
+                    quizErrorMessage.classList.remove('hidden');
+                    return;
+                } else {
+                    quizErrorMessage.classList.add('hidden');
+                }
+
+                checkAnswersBtn.textContent = 'Membandingkan Jawaban...';
+                
+                answerInputs.forEach(input => {
+                    const questionId = input.id;
+                    const studentAnswer = input.value.trim();
+                    const answerDisplayArea = input.nextElementSibling; // The .answer-display-area div
+
+                    // Get the correct answer from the .correct-answer-text within the display area
+                    const correctAnswerElement = answerDisplayArea.querySelector('.correct-answer-text');
+                    const correctAnswer = correctAnswerElement ? correctAnswerElement.textContent.trim() : '';
+
+                    // Store student's answer for later download
+                    studentAnswers[questionId] = {
+                        question: input.previousElementSibling.textContent.trim(), // The label text
+                        student: studentAnswer,
+                        correct: correctAnswer
+                    };
+
+                    // Display comparison result
+                    const comparisonResultDisplay = answerDisplayArea.querySelector(`.comparison-result[data-comparison-for="${questionId}"]`);
+
+                    if (comparisonResultDisplay) {
+                        if (studentAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+                            comparisonResultDisplay.textContent = 'Status: Benar! ✅';
+                            comparisonResultDisplay.classList.remove('incorrect');
+                            comparisonResultDisplay.classList.add('correct');
+                        } else {
+                            comparisonResultDisplay.textContent = 'Status: Salah ❌';
+                            comparisonResultDisplay.classList.remove('correct');
+                            comparisonResultDisplay.classList.add('incorrect');
+                        }
+                    }
+                    
+                    answerDisplayArea.classList.add('visible');
+                });
+                checkAnswersBtn.textContent = 'Periksa Jawaban'; // Reset button text
+                downloadResultsBtn.disabled = false;
+            });
+
+            downloadResultsBtn.addEventListener('click', () => {
+                const { name, studentClass, date } = studentInfo;
+                let reportContent = `
+                    <style>
+                        body { font-family: 'Inter', sans-serif; line-height: 1.6; color: #333; margin: 20px; }
+                        h1, h2, h3 { color: #0284c7; }
+                        .section-title { margin-top: 30px; border-bottom: 2px solid #0284c7; padding-bottom: 5px; }
+                        .question-block { margin-bottom: 20px; padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px; background-color: #ffffff; }
+                        .question-text { font-weight: bold; margin-bottom: 10px; }
+                        .answer-label { font-weight: 600; margin-top: 10px; display: block; }
+                        .student-answer { color: #1d4ed8; margin-left: 5px; }
+                        .correct-answer { color: #059669; margin-left: 5px; }
+                        .comparison { margin-top: 8px; font-weight: bold; }
+                        .comparison.correct { color: #059669; }
+                        .comparison.incorrect { color: #dc2626; }
+                    </style>
+                    <h1>Hasil Latihan Literasi Biologi Kelas 9</h1>
+                    <p><strong>Nama:</strong> ${name}</p>
+                    <p><strong>Kelas:</strong> ${studentClass}</p>
+                    <p><strong>Tanggal:</strong> ${date}</p>
+                    <hr style="margin-top: 20px; margin-bottom: 20px;">
+                `;
+
+                const categories = {
+                    'mudah': 'Kategori Mudah',
+                    'sedang': 'Kategori Sedang',
+                    'sulit': 'Kategori Sulit'
+                };
+
+                for (const categoryId in categories) {
+                    reportContent += `<h2 class="section-title">${categories[categoryId]}</h2>`;
+                    const categoryQuestions = document.getElementById(categoryId).querySelectorAll('.answer-input');
+                    
+                    categoryQuestions.forEach(input => {
+                        const questionId = input.id;
+                        const questionText = input.previousElementSibling.textContent.trim();
+                        const studentAnswer = studentAnswers[questionId] ? studentAnswers[questionId].student : 'Tidak Dijawab';
+                        const correctAnswer = studentAnswers[questionId] ? studentAnswers[questionId].correct : 'Tidak Tersedia';
+                        
+                        let comparisonText = '';
+                        let comparisonClass = '';
+                        if (studentAnswer.toLowerCase() === correctAnswer.toLowerCase() && studentAnswer !== 'Tidak Dijawab') {
+                            comparisonText = 'Status: Benar! ✅';
+                            comparisonClass = 'correct';
+                        } else if (studentAnswer !== 'Tidak Dijawab') {
+                            comparisonText = 'Status: Salah ❌';
+                            comparisonClass = 'incorrect';
+                        } else {
+                            comparisonText = 'Status: Belum Dijawab';
+                            comparisonClass = '';
+                        }
+
+                        reportContent += `
+                            <div class="question-block">
+                                <p class="question-text">${questionText}</p>
+                                <p><span class="answer-label">Jawaban Siswa:</span> <span class="student-answer">${studentAnswer}</span></p>
+                                <p><span class="answer-label">Jawaban Sebenarnya:</span> <span class="correct-answer">${correctAnswer}</span></p>
+                                <p class="comparison ${comparisonClass}">${comparisonText}</p>
+                            </div>
+                        `;
+                    });
+                }
+
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(reportContent);
+                newWindow.document.close();
+                newWindow.print(); // Suggest printing to PDF
+            });
+        });
+    </script>
+
+</body>
+</html>
