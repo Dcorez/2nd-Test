@@ -513,7 +513,7 @@
                     quizErrorMessage.classList.add('hidden');
                 }
 
-                checkAnswersBtn.textContent = 'Membandingkan Jawaban...';
+                checkAnswersBtn.textContent = 'Memproses Jawaban...';
                 
                 // Process all answers and store them
                 const allAnswerInputs = document.querySelectorAll('.answer-input');
@@ -545,20 +545,13 @@
                         correct: correctAnswer
                     };
 
-                    // Update individual comparison results (optional, but good for consistency)
+                    // Hide individual comparison results
                     const comparisonResultDisplay = answerDisplayArea.querySelector(`.comparison-result[data-comparison-for="${questionId}"]`);
                     if (comparisonResultDisplay) {
-                        if (studentAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
-                            comparisonResultDisplay.textContent = 'Status: Benar! ✅';
-                            comparisonResultDisplay.classList.remove('incorrect');
-                            comparisonResultDisplay.classList.add('correct');
-                        } else {
-                            comparisonResultDisplay.textContent = 'Status: Salah ❌';
-                            comparisonResultDisplay.classList.remove('correct');
-                            comparisonResultDisplay.classList.add('incorrect');
-                        }
+                        comparisonResultDisplay.textContent = ''; // Clear text
+                        comparisonResultDisplay.classList.remove('correct', 'incorrect'); // Remove classes
                     }
-                    answerDisplayArea.classList.add('visible'); // Show individual answers as well
+                    answerDisplayArea.classList.add('visible'); // Still show correct answer
                 });
 
                 // Generate and display consolidated results
