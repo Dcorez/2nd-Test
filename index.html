@@ -9,8 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Sky Blue Neutrals -->
-    <!-- Application Structure Plan: The application now starts with a landing page for student data input (name, class, date) to personalize the experience. After input, users transition to the main quiz page. The quiz page retains its tab-based navigation for difficulty levels (Mudah, Sedang, Sulit), allowing focused study. Each question now features a textarea for student answers. A "Periksa Jawaban" button (initially disabled) appears once all questions in the active tab are answered, triggering the display of correct answers and a comparison. Finally, an "Unduh Hasil" button allows students to get a printable summary of their work. This structure enhances engagement and provides a complete, self-contained learning and assessment tool. -->
-    <!-- Visualization & Content Choices: The source is text-based Q&A. Goal: Enhance comprehension, engagement, and self-assessment. Method: Textareas for direct input, dynamic content visibility for answers and feedback, and a printable HTML report for results. Simple diagrams (structured HTML/CSS) are maintained for visual context within each section. Interaction: Form submission, tab switching, input validation, and button clicks to reveal/compare answers and trigger downloads. Justification: This interactive approach promotes active learning and immediate feedback, making abstract biological concepts more tangible. Library: Vanilla JS for all interactions. -->
+    <!-- Application Structure Plan: The application now starts with a landing page for student data input (name, class, date) to personalize the experience. After input, users transition to the main quiz page. The quiz page retains its tab-based navigation for difficulty levels (Mudah, Sedang, Sulit). All questions across ALL categories must be answered before the global "Periksa Jawaban" button is enabled. Clicking this button reveals a new "Hasil" tab, showing a consolidated view of all student answers, correct answers, and comparison results from all categories. Finally, an "Unduh Hasil" button allows students to get a printable summary of their work. This structure enhances engagement and provides a complete, self-contained learning and assessment tool with a clear progression. -->
+    <!-- Visualization & Content Choices: The source is text-based Q&A. Goal: Enhance comprehension, engagement, and self-assessment with a consolidated results view. Method: Textareas for direct input, dynamic content visibility for the new "Hasil" section, and a printable HTML report for results. Simple diagrams (structured HTML/CSS) are maintained for visual context within each difficulty section. Interaction: Form submission, global input validation, tab switching, and button clicks to reveal/compare answers across all categories and trigger downloads. Justification: This interactive approach promotes active learning, provides comprehensive immediate feedback, and makes abstract biological concepts more tangible by consolidating results for easy review. Library: Vanilla JS for all interactions. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
@@ -99,6 +99,7 @@
                 <button data-target="mudah" class="tab-btn flex-1 py-2 px-4 rounded-lg text-sm sm:text-base text-gray-700 transition-colors duration-300 active">Mudah</button>
                 <button data-target="sedang" class="tab-btn flex-1 py-2 px-4 rounded-lg text-sm sm:text-base text-gray-700 transition-colors duration-300">Sedang</button>
                 <button data-target="sulit" class="tab-btn flex-1 py-2 px-4 rounded-lg text-sm sm:text-base text-gray-700 transition-colors duration-300">Sulit</button>
+                <button data-target="hasil" class="tab-btn flex-1 py-2 px-4 rounded-lg text-sm sm:text-base text-gray-700 transition-colors duration-300 hidden">Hasil</button>
             </nav>
 
             <main id="content-container">
@@ -113,7 +114,7 @@
 
                     <div class="bg-white p-6 rounded-xl shadow-sm">
                         <h4 class="text-lg font-semibold text-sky-600 mb-4">Soal 1</h4>
-                        <p class="font-medium text-gray-700">Berdasarkan teks di atas, jelaskan apa yang dimaksud dengan sel.</p>
+                        <p class="font-medium text-gray-700" data-question-text-id="mudah-q1-main">Berdasarkan teks di atas, jelaskan apa yang dimaksud dengan sel.</p>
                         <div class="mt-4 space-y-4">
                             <div>
                                 <label for="mudah-q1-a" class="block text-gray-700 text-sm font-bold mb-2">a. Apa definisi sel menurut teks?</label>
@@ -156,7 +157,7 @@
 
                     <div class="bg-white p-6 rounded-xl shadow-sm">
                         <h4 class="text-lg font-semibold text-sky-600 mb-4">Soal 2</h4>
-                        <p class="font-medium text-gray-700">Mitokondria dan kloroplas adalah contoh organel bermembran.</p>
+                        <p class="font-medium text-gray-700" data-question-text-id="mudah-q2-main">Mitokondria dan kloroplas adalah contoh organel bermembran.</p>
                         <div class="mt-4 space-y-4">
                             <div>
                                 <label for="mudah-q2-a" class="block text-gray-700 text-sm font-bold mb-2">a. Jenis sel apa yang memiliki organel bermembran seperti mitokondria dan kloroplas?</label>
@@ -209,7 +210,7 @@
                     
                     <div class="bg-white p-6 rounded-xl shadow-sm">
                         <h4 class="text-lg font-semibold text-sky-600 mb-4">Soal 1</h4>
-                        <p class="font-medium text-gray-700">Jelaskan alur perjalanan makanan dari mulut hingga ke usus besar, serta proses pencernaan yang terjadi di setiap organ utama yang disebutkan.</p>
+                        <p class="font-medium text-gray-700" data-question-text-id="sedang-q1-main">Jelaskan alur perjalanan makanan dari mulut hingga ke usus besar, serta proses pencernaan yang terjadi di setiap organ utama yang disebutkan.</p>
                         <div class="mt-4 space-y-4">
                             <div>
                                 <label for="sedang-q1-a" class="block text-gray-700 text-sm font-bold mb-2">a. Di organ mana proses pencernaan karbohidrat dimulai dan enzim apa yang berperan?</label>
@@ -252,7 +253,7 @@
 
                     <div class="bg-white p-6 rounded-xl shadow-sm">
                         <h4 class="text-lg font-semibold text-sky-600 mb-4">Soal 2</h4>
-                        <p class="font-medium text-gray-700">Peran enzim sangat penting dalam proses pencernaan.</p>
+                        <p class="font-medium text-gray-700" data-question-text-id="sedang-q2-main">Peran enzim sangat penting dalam proses pencernaan.</p>
                         <div class="mt-4 space-y-4">
                             <div>
                                 <label for="sedang-q2-a" class="block text-gray-700 text-sm font-bold mb-2">a. Enzim apa yang memulai pencernaan karbohidrat di mulut?</label>
@@ -305,7 +306,7 @@
 
                     <div class="bg-white p-6 rounded-xl shadow-sm">
                         <h4 class="text-lg font-semibold text-sky-600 mb-4">Soal 1</h4>
-                        <p class="font-medium text-gray-700">Analisis peran variasi genetik dalam proses seleksi alam dan bagaimana hal itu berkontribusi pada perubahan populasi.</p>
+                        <p class="font-medium text-gray-700" data-question-text-id="sulit-q1-main">Analisis peran variasi genetik dalam proses seleksi alam dan bagaimana hal itu berkontribusi pada perubahan populasi.</p>
                         <div class="mt-4 space-y-4">
                             <div>
                                 <label for="sulit-q1-a" class="block text-gray-700 text-sm font-bold mb-2">a. Mengapa variasi sifat dalam suatu populasi dianggap sebagai prasyarat penting bagi terjadinya seleksi alam?</label>
@@ -348,7 +349,7 @@
 
                     <div class="bg-white p-6 rounded-xl shadow-sm">
                         <h4 class="text-lg font-semibold text-sky-600 mb-4">Soal 2</h4>
-                        <p class="font-medium text-gray-700">Meskipun proses evolusi melalui seleksi alam berlangsung sangat lama, dampaknya bisa sangat signifikan.</p>
+                        <p class="font-medium text-gray-700" data-question-text-id="sulit-q2-main">Meskipun proses evolusi melalui seleksi alam berlangsung sangat lama, dampaknya bisa sangat signifikan.</p>
                         <div class="mt-4 space-y-4">
                             <div>
                                 <label for="sulit-q2-a" class="block text-gray-700 text-sm font-bold mb-2">a. Jelaskan mengapa seleksi alam dikatakan dapat menyebabkan pembentukan spesies baru.</label>
@@ -389,6 +390,19 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- Kategori Hasil (New Section) -->
+                <section id="hasil" class="content-section space-y-6 hidden">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-xl font-semibold text-sky-600 mb-3">Ringkasan Hasil Latihan</h3>
+                        <p class="text-gray-600 leading-relaxed mb-4">
+                            Berikut adalah ringkasan jawaban Anda untuk semua kategori, beserta jawaban sebenarnya dan status perbandingan.
+                        </p>
+                        <div id="results-summary-content" class="space-y-6">
+                            <!-- Results will be dynamically inserted here -->
+                        </div>
+                    </div>
+                </section>
             </main>
 
             <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
@@ -399,7 +413,7 @@
                     Unduh Hasil (HTML)
                 </button>
             </div>
-            <p id="quiz-error-message" class="text-red-600 text-sm mt-3 text-center hidden">Harap jawab semua pertanyaan di kategori ini.</p>
+            <p id="quiz-error-message" class="text-red-600 text-sm mt-3 text-center hidden">Harap jawab semua pertanyaan di semua kategori.</p>
         </section>
 
     </div>
@@ -419,6 +433,8 @@
             const checkAnswersBtn = document.getElementById('check-answers-btn');
             const downloadResultsBtn = document.getElementById('download-results-btn');
             const quizErrorMessage = document.getElementById('quiz-error-message');
+            const resultsSummaryContent = document.getElementById('results-summary-content');
+            const hasilTabButton = document.querySelector('button[data-target="hasil"]');
 
             let studentInfo = {};
             let studentAnswers = {}; // Store answers for all questions across all categories
@@ -440,8 +456,7 @@
                     landingPage.classList.add('hidden');
                     quizPage.classList.remove('hidden');
                     landingErrorMessage.classList.add('hidden');
-                    // Initialize answer inputs for the first (active) tab
-                    updateCheckButtonState();
+                    updateCheckButtonState(); // Initial check for all inputs
                 } else {
                     landingErrorMessage.classList.remove('hidden');
                 }
@@ -458,25 +473,25 @@
                         section.classList.toggle('hidden', section.id !== targetId);
                     });
 
-                    // Hide all answer displays when changing tabs
-                    document.querySelectorAll('.answer-display-area').forEach(area => {
-                        area.classList.remove('visible');
-                    });
+                    // Hide all individual answer displays when changing tabs (unless on 'hasil' tab)
+                    if (targetId !== 'hasil') {
+                        document.querySelectorAll('.answer-display-area').forEach(area => {
+                            area.classList.remove('visible');
+                        });
+                    }
+                    
                     checkAnswersBtn.textContent = 'Periksa Jawaban';
-                    downloadResultsBtn.disabled = true;
+                    downloadResultsBtn.disabled = true; // Disable download until checked again
                     quizErrorMessage.classList.add('hidden');
-                    updateCheckButtonState();
+                    updateCheckButtonState(); // Re-evaluate check button state
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
             });
 
             function updateCheckButtonState() {
-                const activeSection = document.querySelector('.content-section:not(.hidden)');
-                if (!activeSection) return;
-
-                const answerInputs = activeSection.querySelectorAll('.answer-input');
+                const allAnswerInputs = document.querySelectorAll('.answer-input');
                 let allFilled = true;
-                answerInputs.forEach(input => {
+                allAnswerInputs.forEach(input => {
                     if (input.value.trim() === '') {
                         allFilled = false;
                     }
@@ -490,18 +505,8 @@
             });
 
             checkAnswersBtn.addEventListener('click', () => {
-                const activeSection = document.querySelector('.content-section:not(.hidden)');
-                if (!activeSection) return;
-
-                const answerInputs = activeSection.querySelectorAll('.answer-input');
-                let allFilled = true;
-                answerInputs.forEach(input => {
-                    if (input.value.trim() === '') {
-                        allFilled = false;
-                    }
-                });
-
-                if (!allFilled) {
+                updateCheckButtonState(); // Final check before processing
+                if (checkAnswersBtn.disabled) {
                     quizErrorMessage.classList.remove('hidden');
                     return;
                 } else {
@@ -510,25 +515,38 @@
 
                 checkAnswersBtn.textContent = 'Membandingkan Jawaban...';
                 
-                answerInputs.forEach(input => {
+                // Process all answers and store them
+                const allAnswerInputs = document.querySelectorAll('.answer-input');
+                studentAnswers = {}; // Clear previous answers
+                allAnswerInputs.forEach(input => {
                     const questionId = input.id;
                     const studentAnswer = input.value.trim();
-                    const answerDisplayArea = input.nextElementSibling; // The .answer-display-area div
-
-                    // Get the correct answer from the .correct-answer-text within the display area
+                    const answerDisplayArea = input.nextElementSibling;
                     const correctAnswerElement = answerDisplayArea.querySelector('.correct-answer-text');
                     const correctAnswer = correctAnswerElement ? correctAnswerElement.textContent.trim() : '';
 
-                    // Store student's answer for later download
+                    // Get the main question text (e.g., "a. Apa definisi sel menurut teks?")
+                    const subQuestionText = input.previousElementSibling.textContent.trim();
+                    
+                    // Find the main question text for the block (e.g., "Berdasarkan teks di atas, jelaskan apa yang dimaksud dengan sel.")
+                    let mainQuestionText = '';
+                    let currentParent = input.closest('.bg-white.p-6.rounded-xl.shadow-sm');
+                    if (currentParent) {
+                        const mainQuestionP = currentParent.querySelector('[data-question-text-id]');
+                        if (mainQuestionP) {
+                            mainQuestionText = mainQuestionP.textContent.trim();
+                        }
+                    }
+
                     studentAnswers[questionId] = {
-                        question: input.previousElementSibling.textContent.trim(), // The label text
+                        mainQuestion: mainQuestionText,
+                        subQuestion: subQuestionText,
                         student: studentAnswer,
                         correct: correctAnswer
                     };
 
-                    // Display comparison result
+                    // Update individual comparison results (optional, but good for consistency)
                     const comparisonResultDisplay = answerDisplayArea.querySelector(`.comparison-result[data-comparison-for="${questionId}"]`);
-
                     if (comparisonResultDisplay) {
                         if (studentAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
                             comparisonResultDisplay.textContent = 'Status: Benar! ✅';
@@ -540,12 +558,87 @@
                             comparisonResultDisplay.classList.add('incorrect');
                         }
                     }
-                    
-                    answerDisplayArea.classList.add('visible');
+                    answerDisplayArea.classList.add('visible'); // Show individual answers as well
                 });
+
+                // Generate and display consolidated results
+                generateResultsSummary();
+                
+                // Switch to Hasil tab
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                hasilTabButton.classList.add('active');
+                hasilTabButton.classList.remove('hidden'); // Ensure Hasil tab is visible
+
+                contentSections.forEach(section => {
+                    section.classList.toggle('hidden', section.id !== 'hasil');
+                });
+
                 checkAnswersBtn.textContent = 'Periksa Jawaban'; // Reset button text
                 downloadResultsBtn.disabled = false;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
+
+            function generateResultsSummary() {
+                resultsSummaryContent.innerHTML = ''; // Clear previous results
+
+                const categories = {
+                    'mudah': 'Kategori Mudah',
+                    'sedang': 'Kategori Sedang',
+                    'sulit': 'Kategori Sulit'
+                };
+
+                for (const categoryId in categories) {
+                    let categoryHtml = `<h4 class="text-lg font-semibold text-sky-600 mb-3">${categories[categoryId]}</h4>`;
+                    let currentMainQuestion = '';
+                    let questionCounter = 0;
+
+                    // Get all inputs for this category
+                    const categoryInputs = document.getElementById(categoryId).querySelectorAll('.answer-input');
+                    
+                    categoryInputs.forEach(input => {
+                        const questionId = input.id;
+                        const data = studentAnswers[questionId];
+
+                        if (data) {
+                            if (data.mainQuestion && data.mainQuestion !== currentMainQuestion) {
+                                currentMainQuestion = data.mainQuestion;
+                                questionCounter++;
+                                categoryHtml += `<div class="bg-white p-5 rounded-lg shadow-sm mt-4">`;
+                                categoryHtml += `<p class="font-bold text-gray-700">Soal ${questionCounter}: ${currentMainQuestion}</p>`;
+                                categoryHtml += `<div class="ml-4 mt-2 space-y-2">`;
+                            } else if (!data.mainQuestion && currentMainQuestion === '') {
+                                // Handle cases where mainQuestion is not explicitly set for the first sub-question
+                                // This might indicate a structural issue if mainQuestion is always expected.
+                                // For now, we'll just use the subQuestion as the main if main is missing.
+                                currentMainQuestion = data.subQuestion;
+                                questionCounter++;
+                                categoryHtml += `<div class="bg-white p-5 rounded-lg shadow-sm mt-4">`;
+                                categoryHtml += `<p class="font-bold text-gray-700">Soal ${questionCounter}: ${currentMainQuestion}</p>`;
+                                categoryHtml += `<div class="ml-4 mt-2 space-y-2">`;
+                            }
+
+                            const comparisonText = (data.student.toLowerCase() === data.correct.toLowerCase() && data.student !== '') ? 'Benar! ✅' : (data.student === '' ? 'Belum Dijawab' : 'Salah ❌');
+                            const comparisonClass = (data.student.toLowerCase() === data.correct.toLowerCase() && data.student !== '') ? 'correct' : (data.student === '' ? '' : 'incorrect');
+
+                            categoryHtml += `
+                                <div>
+                                    <p class="font-semibold text-gray-700">${data.subQuestion}</p>
+                                    <p class="text-sm text-gray-600">Jawaban Anda: <span class="student-answer-text">${data.student || 'Tidak Dijawab'}</span></p>
+                                    <p class="text-sm text-gray-600">Jawaban Sebenarnya: <span class="correct-answer-text">${data.correct}</span></p>
+                                    <p class="comparison-result ${comparisonClass}">${comparisonText}</p>
+                                </div>
+                            `;
+                        }
+                        // Close the inner div for sub-questions if the next question is a new main question or end of category
+                        if (input.id.endsWith('-d')) { // Assuming 'd' is always the last sub-question for a main question
+                            categoryHtml += `</div></div>`; // Close inner and outer div
+                            currentMainQuestion = ''; // Reset for next main question
+                        }
+                    });
+                    resultsSummaryContent.innerHTML += categoryHtml;
+                }
+            }
+
 
             downloadResultsBtn.addEventListener('click', () => {
                 const { name, studentClass, date } = studentInfo;
@@ -578,35 +671,48 @@
 
                 for (const categoryId in categories) {
                     reportContent += `<h2 class="section-title">${categories[categoryId]}</h2>`;
-                    const categoryQuestions = document.getElementById(categoryId).querySelectorAll('.answer-input');
-                    
-                    categoryQuestions.forEach(input => {
-                        const questionId = input.id;
-                        const questionText = input.previousElementSibling.textContent.trim();
-                        const studentAnswer = studentAnswers[questionId] ? studentAnswers[questionId].student : 'Tidak Dijawab';
-                        const correctAnswer = studentAnswers[questionId] ? studentAnswers[questionId].correct : 'Tidak Tersedia';
-                        
-                        let comparisonText = '';
-                        let comparisonClass = '';
-                        if (studentAnswer.toLowerCase() === correctAnswer.toLowerCase() && studentAnswer !== 'Tidak Dijawab') {
-                            comparisonText = 'Status: Benar! ✅';
-                            comparisonClass = 'correct';
-                        } else if (studentAnswer !== 'Tidak Dijawab') {
-                            comparisonText = 'Status: Salah ❌';
-                            comparisonClass = 'incorrect';
-                        } else {
-                            comparisonText = 'Status: Belum Dijawab';
-                            comparisonClass = '';
-                        }
+                    let currentMainQuestion = '';
+                    let questionCounter = 0;
 
-                        reportContent += `
-                            <div class="question-block">
-                                <p class="question-text">${questionText}</p>
-                                <p><span class="answer-label">Jawaban Siswa:</span> <span class="student-answer">${studentAnswer}</span></p>
-                                <p><span class="answer-label">Jawaban Sebenarnya:</span> <span class="correct-answer">${correctAnswer}</span></p>
+                    // Iterate through the stored studentAnswers to get data for the report
+                    // Filter by category prefix (e.g., 'mudah-q1-a', 'mudah-q1-b')
+                    const sortedQuestionIds = Object.keys(studentAnswers).filter(id => id.startsWith(categoryId)).sort();
+
+                    sortedQuestionIds.forEach(questionId => {
+                        const data = studentAnswers[questionId];
+                        
+                        if (data) {
+                            if (data.mainQuestion && data.mainQuestion !== currentMainQuestion) {
+                                currentMainQuestion = data.mainQuestion;
+                                questionCounter++;
+                                reportContent += `<div class="question-block">`;
+                                reportContent += `<p class="question-text">Soal ${questionCounter}: ${currentMainQuestion}</p>`;
+                            }
+
+                            let comparisonText = '';
+                            let comparisonClass = '';
+                            if (data.student.toLowerCase() === data.correct.toLowerCase() && data.student !== '') {
+                                comparisonText = 'Status: Benar! ✅';
+                                comparisonClass = 'correct';
+                            } else if (data.student !== '') {
+                                comparisonText = 'Status: Salah ❌';
+                                comparisonClass = 'incorrect';
+                            } else {
+                                comparisonText = 'Status: Belum Dijawab';
+                                comparisonClass = '';
+                            }
+
+                            reportContent += `
+                                <p><span class="answer-label">${data.subQuestion}</span></p>
+                                <p><span class="answer-label">Jawaban Siswa:</span> <span class="student-answer">${data.student || 'Tidak Dijawab'}</span></p>
+                                <p><span class="answer-label">Jawaban Sebenarnya:</span> <span class="correct-answer">${data.correct}</span></p>
                                 <p class="comparison ${comparisonClass}">${comparisonText}</p>
-                            </div>
-                        `;
+                            `;
+                            if (questionId.endsWith('-d')) { // Assuming 'd' is always the last sub-question for a main question
+                                reportContent += `</div>`; // Close question-block div
+                                currentMainQuestion = ''; // Reset for next main question
+                            }
+                        }
                     });
                 }
 
